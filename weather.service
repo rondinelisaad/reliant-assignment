@@ -1,0 +1,9 @@
+[Unit]
+Description=Wheather collecting. 
+
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/weather.sh
+
+[Install]
+WantedBy=multi-user.target
