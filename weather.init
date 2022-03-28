@@ -1,0 +1,29 @@
+#!/bin/bash
+# Description: It running in backgroud a script called weather.sh.
+
+case "$1" in 
+start)
+   /usr/local/bin/weather.sh &
+   echo $!>/var/run/weather.pid
+   ;;
+stop)
+   kill `cat /var/run/weather.pid`
+   rm /var/run/weather.pid
+   ;;
+restart)
+   $0 stop
+   $0 start
+   ;;
+status)
+   if [ -e /var/run/weather.pid ]; then
+      echo weather.sh is running, pid=`cat /var/run/weather.pid`
+   else
+      echo weather.sh is NOT running
+      exit 1
+   fi
+   ;;
+*)
+   echo "Usage: $0 {start|stop|status|restart}"
+esac
+
+exit 0 
