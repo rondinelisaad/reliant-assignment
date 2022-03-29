@@ -66,5 +66,6 @@ cron {'Backuping Weatcher files':
    require => File["/usr/local/bin/backup-weather.sh"],
   }
 
+# I installed this dependency using: puppet module install rehan-jq
 include jq
 }
