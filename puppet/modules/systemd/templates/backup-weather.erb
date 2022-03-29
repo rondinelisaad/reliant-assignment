@@ -1,0 +1,49 @@
+#!/bin/bash
+####################################
+#Description: This script will backup all files create in the last day. 
+#             First, it will create a directory /backup/{Month-Day-Hour-Minute}/. Then
+#             search every json file created a day before and move to a temporary directory. Once the files
+#             moved to this directory the script will compress it and saving at /backup/{Month-Day-Hour-Minute}/
+#             In the end, the files older than 10 days will be erased.
+#Author: Rondineli Saad
+#Version: 0.1
+####################################
+
+# Source dir, where files are storaged.
+source_dir="/root/weather-file"
+
+# Where to backup to.
+dest_dir="/root/weather-file-backup"
+
+
+today=$(date +%Y-%m-%d)
+yesterday=$(date  --date="yesterday" +"%Y-%m-%d")
+backup_time=$(date +%Y-%m-%d-%H-%M)
+
+# Dir backup destination
+backup_dir="/backup/${backup_time}"
+
+# Validating if backup dir destinations exit. If not, it will created.
+if [ ! -d ${backup_dir} ];then
+        mkdir -p ${backup_dir}
+fi
+
+# Search for files created one day before and move to a temporary dir to be compressed.
+find ${source_dir} -type f -newermt ${yesterday} ! -newermt ${today} -exec mv {} ${dest_dir}/ \;
+
+# Create archive filename.
+if [ $? -eq 0 ];then
+        cd ${backup_dir}
+        tar zcvf weather_${backup_time}.tar.gz ${dest_dir}
+        if [ $? -eq 0 ];then
+        # If the compressing process worked, the files from temporary dir will be removed.
+                rm -Rf ${dest_dir}/*.json
+        else
+                exit $?
+        fi
+else
+        exit $?
+fi
+
+# Remove directory in backup dir  older than 10 days
+find /backup -type d -mtime +10 -name "$(date -d '10 days' +%F)-*" -prune -exec rm -Rf {} \;
